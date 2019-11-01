@@ -1,0 +1,6 @@
+<button class="newgame" nbButton outline status="danger" (click)="newGame()">Start New Game</button>
+<button class="newgame" nbButton outline status="success" *ngIf="paused" (click)="startMoving()">Resume</button>
+<button class="newgame" nbButton outline status="warning" *ngIf="!paused" (click)="pauseGame()">Pause</button>
+<main>
+  <app-cell [ngStyle]="{'background-color': item.color }" *ngFor="let item of squares; let i = index"></app-cell>
+</main>
