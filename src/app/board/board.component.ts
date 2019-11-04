@@ -46,7 +46,7 @@ export class BoardComponent implements OnInit {
     }
 
     // this.boardWidth = 32;
-    this.boardSize = this.boardWidth * this.boardWidth;
+    this.boardSize = this.boardWidth ** 2;
     this.squares = Array(this.boardSize).fill(this.newEmptyCell());
     this.paused = false;
     this.snakeDirection = 'KeyD';
