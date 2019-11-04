@@ -46,6 +46,7 @@ export class BoardComponent implements OnInit {
     }
 
     // this.boardWidth = 32;
+    document.documentElement.style.setProperty('--board-width', this.boardWidth.toString());
     this.boardSize = this.boardWidth ** 2;
     this.squares = Array(this.boardSize).fill(this.newEmptyCell());
     this.paused = false;
