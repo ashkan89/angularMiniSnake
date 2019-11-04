@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, Input } from '@angular/core';
 
 export enum KEY_CODE {
   KeyW = 'KeyW',
@@ -13,11 +13,14 @@ export enum KEY_CODE {
   styleUrls: ['./board.component.scss']
 })
 export class BoardComponent implements OnInit {
+  @Input() boardWidth: number;
+
   public squares: any[];
   public interval: any;
   public paused: boolean;
-  public snakeDirection: string; // 'KeyW' | 'KeyA' | 'KeyS' | 'KeyD';
+  public snakeDirection: string;
   private boardSize: number;
+  // private boardWidth: number;
 
   constructor() { }
 
@@ -34,7 +37,7 @@ export class BoardComponent implements OnInit {
     this.paused = false;
     this.interval = setInterval(() => {
       this.moveSnake(this.snakeDirection);
-    }, 500);
+    }, 100);
   }
 
   public newGame() {
@@ -42,8 +45,9 @@ export class BoardComponent implements OnInit {
       this.pauseGame();
     }
 
-    this.boardSize = 1024;
-    this.squares = Array(this.boardSize).fill({ isFill: false, isHead: false, isTail: false, isFood: false, color: 'aqua' });
+    // this.boardWidth = 32;
+    this.boardSize = this.boardWidth * this.boardWidth;
+    this.squares = Array(this.boardSize).fill(this.newEmptyCell());
     this.paused = false;
     this.snakeDirection = 'KeyD';
     this.interval = null;
@@ -51,6 +55,10 @@ export class BoardComponent implements OnInit {
     this.newFood();
     this.newSnake();
     this.startMoving();
+  }
+
+  public newEmptyCell(): any {
+    return { isFill: false, isHead: false, isTail: false, isFood: false, color: 'aqua' };
   }
 
   public newFood() {
@@ -79,7 +87,7 @@ export class BoardComponent implements OnInit {
   }
 
   public newCellNum(): number {
-    return Math.round(Math.random() * 1023);
+    return Math.round(Math.random() * (this.boardSize - 1));
   }
 
   public newFoodCell() {
@@ -88,22 +96,63 @@ export class BoardComponent implements OnInit {
 
   public moveSnake(key: string) {
     const head = this.getSnakeHead();
-    switch (key) {
-      case 'KeyW':
-        console.log('moving up');
-        break;
+    const headIndex = this.getSnakeHeadIndex();
+    const nextCellIndex = this.getNextCellIndex();
+    const nextIsFood = this.getCellByIndex(nextCellIndex).isFood;
+    this.squares.splice(headIndex, 1, this.newEmptyCell());
+    this.squares.splice(nextCellIndex, 1, head[0]);
 
-      case 'KeyA':
-        console.log('moving left');
-        break;
+    if (nextIsFood) {
+      this.newFood();
+    }
+  }
 
-      case 'KeyS':
-        console.log('moving down');
-        break;
+  public getCellByIndex(idx: number): any {
+    return this.squares[idx];
+  }
 
-      case 'KeyD':
-        console.log('moving right');
-        break;
+  public getSnakeHead(): any {
+    return this.squares.filter((item: any) => {
+      return item.isHead === true;
+    });
+  }
+
+  public getSnakeHeadIndex(): any {
+    return this.squares.findIndex((item: any): any => {
+      return item.isHead === true;
+    });
+  }
+
+  public getNextCellIndex(): number {
+    const headIndex = this.getSnakeHeadIndex();
+    switch (this.snakeDirection) {
+      case KEY_CODE.KeyW:
+        if (headIndex < this.boardWidth) {
+          return this.boardSize - (this.boardWidth - headIndex);
+        } else {
+          return headIndex - this.boardWidth;
+        }
+
+      case KEY_CODE.KeyA:
+        if ((headIndex % this.boardWidth) === 0) {
+          return headIndex + (this.boardWidth - 1);
+        } else {
+          return headIndex - 1;
+        }
+
+      case KEY_CODE.KeyS:
+        if (headIndex >= (this.boardWidth * (this.boardWidth - 1))) {
+          return (headIndex - (this.boardSize - 1) + (this.boardWidth - 1));
+        } else {
+          return headIndex + this.boardWidth;
+        }
+
+      case KEY_CODE.KeyD:
+        if (((headIndex + 1) % this.boardWidth) === 0) {
+          return headIndex - (this.boardWidth - 1);
+        } else {
+          return headIndex + 1;
+        }
 
       default:
         console.log('Invalid Key');
@@ -111,15 +160,18 @@ export class BoardComponent implements OnInit {
     }
   }
 
-  public getSnakeHead(): any {
-    return this.squares.filter((item) => {
-      return item.isHead === true;
-    });
+  private isKeyCodeAcceptable(key: string): boolean {
+    return Object.values(KEY_CODE).includes(key as KEY_CODE);
   }
 
   @HostListener('document:keypress', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    // this.moveSnake(event.code);
-    this.snakeDirection = event.code;
+    if (this.paused) {
+      return;
+    }
+
+    if (this.isKeyCodeAcceptable(event.code)) {
+      this.snakeDirection = event.code;
+    }
   }
 }
