@@ -15,9 +15,13 @@ export enum KEY_CODE {
 export class BoardComponent implements OnInit {
   @Input() boardWidth = 32;
   @Input() cellWidth = 20;
+  @Input() speed = 100;
+  @Input() wallCount = 15;
 
   public squares: any[];
   public paused: boolean;
+  public score: number;
+  public crashed: boolean;
   private interval: any;
   private snakeDirection: string;
   private boardSize: number;
@@ -33,11 +37,15 @@ export class BoardComponent implements OnInit {
     this.paused = true;
   }
 
+  public gameOver() {
+    clearInterval(this.interval);
+  }
+
   public startMoving() {
     this.paused = false;
     this.interval = setInterval(() => {
       this.moveSnake(this.snakeDirection);
-    }, 100);
+    }, this.speed);
   }
 
   public newGame() {
@@ -53,14 +61,17 @@ export class BoardComponent implements OnInit {
     this.paused = false;
     this.snakeDirection = 'KeyD';
     this.interval = null;
+    this.score = 0;
+    this.crashed = false;
 
     this.newFood();
     this.newSnake();
+    this.makeWalls();
     this.startMoving();
   }
 
   public newEmptyCell(): any {
-    return { isFill: false, isHead: false, isTail: false, isFood: false, color: 'aqua' };
+    return { isFill: false, isHead: false, isTail: false, isFood: false, isWall: false, color: 'aqua' };
   }
 
   public newFood() {
@@ -76,7 +87,17 @@ export class BoardComponent implements OnInit {
   }
 
   public newSnakeCell() {
-    return { isFill: true, isHead: true, isTail: true, isFood: false, color: 'brown' };
+    return { isFill: true, isHead: true, isTail: true, isFood: false, isWall: false, color: 'brown' };
+  }
+
+  public newWallCell() {
+    return { isFill: false, isHead: false, isTail: false, isFood: false, isWall: true, color: 'black' };
+  }
+
+  public makeWalls() {
+    for (let index = 0; index < this.wallCount; index++) {
+      this.squares.splice(this.getNewAvailableCell(), 1, this.newWallCell());
+    }
   }
 
   public getNewAvailableCell(): number {
@@ -93,19 +114,26 @@ export class BoardComponent implements OnInit {
   }
 
   public newFoodCell() {
-    return { isFill: true, isHead: false, isTail: false, isFood: true, color: 'black' };
+    return { isFill: true, isHead: false, isTail: false, isFood: true, isWall: false, color: 'darkgreen' };
   }
 
   public moveSnake(key: string) {
-    const head = this.getSnakeHead();
+    const head = this.getSnakeHead()[0];
     const headIndex = this.getSnakeHeadIndex();
     const nextCellIndex = this.getNextCellIndex();
     const nextIsFood = this.getCellByIndex(nextCellIndex).isFood;
+    const nextIsWall = this.getCellByIndex(nextCellIndex).isWall;
     this.squares.splice(headIndex, 1, this.newEmptyCell());
-    this.squares.splice(nextCellIndex, 1, head[0]);
+    this.squares.splice(nextCellIndex, 1, head);
 
     if (nextIsFood) {
+      this.score += 10;
       this.newFood();
+    } else if (nextIsWall) {
+      this.crashed = true;
+      this.gameOver();
+      head.color = 'red';
+      this.squares.splice(nextCellIndex, 1, head);
     }
   }
 
