@@ -1,15 +1,16 @@
 $boardWidth: var(--board-width);
+$cellWidth: var(--cell-width);
 
 main {
   display: grid;
-  grid-template-columns: repeat($boardWidth, 20px);
-  grid-template-rows: 20px;
+  grid-template-columns: repeat($boardWidth, calc(#{$cellWidth}));
+  grid-template-rows: calc(#{$cellWidth});
   gap: 1px;
 }
 
 app-cell {
   border: 1px solid whitesmoke;
-  height: 20px;
+  height: calc(#{$cellWidth});
 }
 
 .newgame {

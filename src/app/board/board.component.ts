@@ -13,14 +13,14 @@ export enum KEY_CODE {
   styleUrls: ['./board.component.scss']
 })
 export class BoardComponent implements OnInit {
-  @Input() boardWidth: number;
+  @Input() boardWidth = 32;
+  @Input() cellWidth = 20;
 
   public squares: any[];
-  public interval: any;
   public paused: boolean;
-  public snakeDirection: string;
+  private interval: any;
+  private snakeDirection: string;
   private boardSize: number;
-  // private boardWidth: number;
 
   constructor() { }
 
@@ -45,8 +45,9 @@ export class BoardComponent implements OnInit {
       this.pauseGame();
     }
 
-    // this.boardWidth = 32;
     document.documentElement.style.setProperty('--board-width', this.boardWidth.toString());
+    document.documentElement.style.setProperty('--cell-width', `${this.cellWidth}px`);
+
     this.boardSize = this.boardWidth ** 2;
     this.squares = Array(this.boardSize).fill(this.newEmptyCell());
     this.paused = false;
@@ -173,6 +174,8 @@ export class BoardComponent implements OnInit {
 
     if (this.isKeyCodeAcceptable(event.code)) {
       this.snakeDirection = event.code;
+    } else {
+      console.log('Invalid Key: ', event.code);
     }
   }
 }
