@@ -119,6 +119,7 @@ export class BoardComponent implements OnInit {
 
   public moveSnake(key: string) {
     const head = this.getSnakeHead()[0];
+    const tail = this.getSnakeTail()[0];
     const headIndex = this.getSnakeHeadIndex();
     const nextCellIndex = this.getNextCellIndex();
     const nextIsFood = this.getCellByIndex(nextCellIndex).isFood;
@@ -144,6 +145,18 @@ export class BoardComponent implements OnInit {
   public getSnakeHead(): any {
     return this.squares.filter((item: any) => {
       return item.isHead === true;
+    });
+  }
+
+  public getSnakeTailIndex(): any {
+    return this.squares.findIndex((item: any): any => {
+      return item.isTail === true;
+    });
+  }
+
+  public getSnakeTail(): any {
+    return this.squares.filter((item: any) => {
+      return item.isTail === true;
     });
   }
 
